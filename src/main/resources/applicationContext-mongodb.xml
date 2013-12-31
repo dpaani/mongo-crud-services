@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+
+        http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+
+	<bean id="mongoTypeMapper"     class="org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper">
+		<constructor-arg name="typeKey"><null/></constructor-arg>
+	</bean>
+
+	<bean id="mongoMappingContext"      class="org.springframework.data.mongodb.core.mapping.MongoMappingContext" />
+
+	<bean id="mongoConverter"     class="org.springframework.data.mongodb.core.convert.MappingMongoConverter">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+		<constructor-arg name="mappingContext" ref="mongoMappingContext" />
+		<property name="typeMapper" ref="mongoTypeMapper"></property>
+	</bean>
+
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+		<constructor-arg name="mongoConverter" ref="mongoConverter" />
+		<property name="writeConcern">
+			<util:constant static-field="com.mongodb.WriteConcern.SAFE"></util:constant>
+		</property>
+	</bean>
+
+	<mongo:db-factory
+		id="mongoDbFactory"
+		dbname="${DB.NAME}"
+		username="${MONGO.USERNAME}"
+		password="${MONGO.PASSWORD}"
+		mongo-ref="mongo" />
+
+	<mongo:mongo replica-set="${MONGO.REPLICASET}" >
+		<mongo:options connections-per-host="${MONGO.CONNECTIONS.PER.HOST}"
+			threads-allowed-to-block-for-connection-multiplier="${MONGO.THREADS.ALLOWED.TO.WAIT.X}" />
+	</mongo:mongo>
+
+</beans>

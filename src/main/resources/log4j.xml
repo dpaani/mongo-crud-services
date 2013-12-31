@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  Log4j Configuration                                                  -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<!--
+   | For more configuration infromation and examples see the Jakarta Log4j
+   | website: http://jakarta.apache.org/log4j
+ -->
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+
+    <!-- ================================= -->
+    <!-- Preserve messages in a local file -->
+    <!-- ================================= -->
+     <appender name="file" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${catalina.base}/logs/wmmongo.log"/>
+        <param name="append" value="true"/>
+        <param name="MaxFileSize" value="10MB" />
+		<param name="MaxBackupIndex" value="10" />
+        <layout class="org.apache.log4j.PatternLayout">
+		     <param name="ConversionPattern" value="%5p [%d] [%t] (%F:%L) - %m%n"/>
+        </layout>
+     </appender>
+
+
+ 	<appender name="CoalescingStatistics" class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+        <param name="TimeSlice" value="600000"/>
+        <appender-ref ref="perfFileAppender"/>
+    </appender>
+
+ 	<appender name="perfFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/Users/ddakshna/wmmongo-perf.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="[%5p] [%X{displayName}] [%d{ISO8601}] (%c{1}:%M:%L) - %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="org.perf4j.TimingLogger" additivity="false">
+        <level value="ALL"/>
+        <appender-ref ref="CoalescingStatistics"/>
+    </logger>
+
+    <!-- ============================== -->
+    <!-- Append messages to the console -->
+    <!-- ============================== -->
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <errorHandler class = "org.apache.log4j.helpers.OnlyOnceErrorHandler"/>
+        <param name="Target" value="System.out"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%t] [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
+
+
+    <!-- ================ -->
+    <!-- Limit categories -->
+    <!-- ================ -->
+
+	<!-- This is required. Otherwise RADT deployment will fail -->
+    <category name="org.apache.catalina.startup">
+        <priority value="INFO"/>
+    </category>
+
+	<!-- Log SOAP request and response payloads -->
+	<!-- Commented to support load testing
+	<logger name="org.springframework.ws.client.MessageTracing">
+		<level value="trace" />
+	</logger>
+	-->
+
+    <category name="org.springframework.data.mongodb.core">
+        <priority value="DEBUG"/>
+    </category>
+    <category name="org.springframework.data.mongodb">
+        <priority value="DEBUG"/>
+    </category>
+
+    <category name="com.codetosalvation.mongo">
+        <priority value="DEBUG"/>
+    </category>
+
+    <category name="org.springframework.web.client">
+        <priority value="DEBUG"/>
+    </category>
+
+    <category name="org.springframework.ws.transport.http">
+        <priority value="DEBUG"/>
+    </category>
+
+    <category name="org.springframework.ws.client">
+        <priority value="DEBUG"/>
+    </category>
+
+    <logger name="org.springframework.ws.client.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
+    <logger name="org.springframework.ws.server.MessageTracing">
+        <level value="TRACE"/>
+    </logger>
+
+    <!-- ======================= -->
+    <!-- Setup the Root category -->
+    <!-- ======================= -->
+
+    <root>
+        <priority value="INFO"/>
+        <appender-ref ref="file"/>
+        <appender-ref ref="CONSOLE"/>
+</root>
+
+
+</log4j:configuration>
